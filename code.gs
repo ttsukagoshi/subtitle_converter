@@ -13,6 +13,7 @@ function onOpen() {
 }
 
 /**
+ * SBV -> Spreadsheet
  * Convert text data of SBV file that is pasted in sheet 'sbv' into a spreadsheet table.
  */
 function convertSbv2Sheet() {
@@ -37,22 +38,22 @@ function convertSbv2Sheet() {
     for (var i = 0; i < captions.length; i++) {
       var captionLine = captions[i][0];
       if (captionLine.match(/^\d:\d{2}:\d{2}\.\d{3},\d:\d{2}:\d{2}\.\d{3}$/) !== null) {
-        // 時間行のとき
+        // When the row is a time record
         tableRow += 1;
         tableCol = 0;
         table[tableRow] = [captionLine,''];
         prevRow = 'time';
       } else if (prevRow == 'time') {
-        // 前行が時間行のとき。つまりテキスト1行目のとき
+        // When the previous row is a time record, i.e., when this row is the first row of text
         tableCol = 1;
         table[tableRow][1] = captionLine;
         prevRow = 'cap';
       } else if (prevRow = 'cap' && captionLine !== '') {
-        // 前行がテキスト行であり、この行が空白でないとき。つまりテキスト2行目以降のとき。
+        // When the previous row is text and this row is not a blank, i.e., when this row is the second row of text
         tableRow += 1;
         table[tableRow] = ['', captionLine];
       } else if (captionLine == '') {
-        // 空白行のとき
+        // When the row is blank
         continue;
       }
     }
@@ -77,6 +78,7 @@ function convertSbv2Sheet() {
 }
 
 /**
+ * Spreadsheet -> SBV
  * Convert time-caption table into a simple SBV file-formatted text that can be used for YouTube.
  */
 function convertSheet2Sbv() {
@@ -103,7 +105,6 @@ function convertSheet2Sbv() {
       sbvArray.push('');
     }
     sbvText = sbvArray.join('\n');
-    Logger.log(sbvText);
 
     // Create new sheet and set contents of 'sbvText'.
     var newSheet = ss.insertSheet(sheetName, 0);
@@ -167,6 +168,7 @@ function deleteSheets(exceptionSheets) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheets = ss.getSheets();
   var deleteSheets = sheets.filter(ds => exceptionSheets.indexOf(ds) == -1);
+  Logger.log(deleteSheets);
   if (deleteSheets.length !== 0) {
     for (var i = 0; i < deleteSheets.length; i++) {
       ss.deleteSheet(deleteSheets[i]);
