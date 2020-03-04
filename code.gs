@@ -6,6 +6,7 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('Convert')
   .addItem('SBV -> Sheet', 'convertSbv2Sheet')
+  .addItem('SBV -> SRT', 'convertSbv2Srt')
   .addItem('Sheet -> SBV', 'convertSheet2Sbv')
   .addSeparator()
   .addItem('Delete Sheets', 'deleteAllSheets')
@@ -73,6 +74,73 @@ function convertSbv2Sheet() {
     
     // Alert
     ui.alert('Complete', 'SBV converted to spreadsheet.', ui.ButtonSet.OK);
+  } catch (e) {
+    var log = errorMessage(e);
+    ui.alert(log);
+  }
+}
+
+/**
+ * SBV -> SRT
+ * Convert text data of SBV file that is pasted in sheet 'sbv' into a SRT.
+ */
+function convertSbv2Srt() {
+  const ui = SpreadsheetApp.getUi();
+  const sbv = ss.getSheetByName('sbv');  
+  var captions = sbv.getRange(2, 1, sbv.getLastRow()-1).getValues();
+  var counter = 0;
+  var srtArray = [];
+  var srtTime = '';
+  /*var table = [];
+  var prevRow = '';
+  var prevRowText = '';
+  var tableRow = -1;
+  var tableCol = 0;*/
+  const now = new Date();
+  const sheetName = 'sbv2srt' + Utilities.formatDate(now, ss.getSpreadsheetTimeZone(), 'yyyyMMddHHmmss');
+  try {
+    if (captions.length < 1) {
+      throw new Error('No captions available for converting.');
+    }
+    
+    for (var i = 0; i < captions.length; i++) {
+      var captionLine = captions[i][0];
+      if (captionLine.match(/^\d:\d{2}:\d{2}\.\d{3},\d:\d{2}:\d{2}\.\d{3}$/) !== null) {
+        // When the row is a time record
+        counter += 1;
+        srtArray.push(counter);
+        srtTime = timeSbv2Srt(captionLine);
+        table[tableRow] = [captionLine,''];
+        prevRow = 'time';
+      } else if (prevRow == 'time') {
+        // When the previous row is a time record, i.e., when this row is the first row of text
+        tableCol = 1;
+        table[tableRow][1] = captionLine;
+        prevRow = 'cap';
+      } else if (prevRow = 'cap' && captionLine !== '') {
+        // When the previous row is text and this row is not a blank, i.e., when this row is the second row of text
+        prevRowText = table[tableRow][1];
+        prevRowText += '\n' + captionLine;
+        table[tableRow][1] = prevRowText;
+      } else if (captionLine == '') {
+        // When the row is blank
+        continue;
+      }
+    }
+
+    // Create new sheet and set contents of array 'table'.
+    var newSheet = ss.insertSheet(sheetName, 0);
+    var sheetHeader = newSheet.getRange(1, 1, 1, header[0].length)
+    .setValues(header)
+    .setHorizontalAlignment('center')
+    .setTextStyle(headerStyle);
+    var sheetData = newSheet.getRange(2, 1, table.length, header[0].length)
+    .setValues(table)
+    .setVerticalAlignment('top');
+    newSheet.setFrozenRows(1);
+    
+    // Alert
+    ui.alert('Complete', 'SBV converted to SRT.', ui.ButtonSet.OK);
   } catch (e) {
     var log = errorMessage(e);
     ui.alert(log);
@@ -161,6 +229,16 @@ function errorMessage(e) {
   return message;
 }
 
+/**
+ * Convert SBV time expression to SRT time expression.
+ * @param {string} sbvTime SBV time expression
+ * @return {string} SRT time expression
+ */
+function timeSbv2Srt(sbvTime) {
+  var srtTime = srtTime.replace(',',' --> ');
+  // TBD
+}
+  
 /**
  * Delete all sheets in this spreadsheet except for the designated sheet IDs
  * @param {Array} exceptionSheets [Optional] Array of sheet objects to not delete
