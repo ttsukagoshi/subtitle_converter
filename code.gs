@@ -22,6 +22,7 @@ function convertSbv2Sheet() {
   var captions = sbv.getRange(2, 1, sbv.getLastRow()-1).getValues();
   var table = [];
   var prevRow = '';
+  var prevRowText = '';
   var tableRow = -1;
   var tableCol = 0;
   const now = new Date();
@@ -50,8 +51,9 @@ function convertSbv2Sheet() {
         prevRow = 'cap';
       } else if (prevRow = 'cap' && captionLine !== '') {
         // When the previous row is text and this row is not a blank, i.e., when this row is the second row of text
-        tableRow += 1;
-        table[tableRow] = ['', captionLine];
+        prevRowText = table[tableRow][1];
+        prevRowText += '\n' + captionLine;
+        table[tableRow][1] = prevRowText;
       } else if (captionLine == '') {
         // When the row is blank
         continue;
