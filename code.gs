@@ -247,14 +247,6 @@ function deleteSheets(exceptionSheets) {
   exceptionSheets = exceptionSheets || [];
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheets = ss.getSheets();
-  var deleteSheets = sheets.filter(ds => exceptionSheets.indexOf(ds) == -1);
-  Logger.log(deleteSheets);
-  if (deleteSheets.length !== 0) {
-    for (var i = 0; i < deleteSheets.length; i++) {
-      ss.deleteSheet(deleteSheets[i]);
-    }
-  }
-  /*
   for (var i = 0; i < sheets.length; i++) {
     var sheet = sheets[i];
     for (var j = 0; j < exceptionSheetIds.length; j++) {
@@ -265,5 +257,5 @@ function deleteSheets(exceptionSheets) {
         ss.deleteSheet(sheet);
       }
     }
-  }*/ 
+  }
 }
